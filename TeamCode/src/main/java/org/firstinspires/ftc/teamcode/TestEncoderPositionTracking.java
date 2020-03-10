@@ -51,7 +51,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name="EncoderPositionTracking", group="Linear Opmode")
 //@Disabled
 public class TestEncoderPositionTracking extends LinearOpMode {
-    
+
     private ElapsedTime runtime = new ElapsedTime();
 
     private DcMotor Encoder1 = null;//左编码器
