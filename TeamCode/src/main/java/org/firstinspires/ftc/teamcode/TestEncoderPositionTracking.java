@@ -100,8 +100,8 @@ public class TestEncoderPositionTracking extends LinearOpMode {
         double[] nowAbsolutePosition = new double[2];
 
         int lastPositionEcoder1 = Encoder1.getCurrentPosition();
-        int lastPositionEcoder2 = Encoder1.getCurrentPosition();
-        int lastPositionEcoder3 = Encoder1.getCurrentPosition();
+        int lastPositionEcoder2 = Encoder2.getCurrentPosition();
+        int lastPositionEcoder3 = Encoder3.getCurrentPosition();
 
         double lastAbsoluteOrientation = 0;
         public ThreadPositionTracking () {
