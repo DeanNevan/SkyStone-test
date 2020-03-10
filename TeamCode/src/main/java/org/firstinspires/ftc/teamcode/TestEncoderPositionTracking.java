@@ -51,8 +51,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name="EncoderPositionTracking", group="Linear Opmode")
 //@Disabled
 public class TestEncoderPositionTracking extends LinearOpMode {
-
-    // Declare OpMode members.
+    
     private ElapsedTime runtime = new ElapsedTime();
 
     private DcMotor Encoder1 = null;//左编码器
@@ -84,7 +83,6 @@ public class TestEncoderPositionTracking extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             //打印信息
             telemetry.addData("当前绝对角度", threadPositionTracking.getNowAbsoluteOrientation());
