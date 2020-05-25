@@ -32,61 +32,41 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="Test1", group="Linear Opmode")
 @Disabled
 public class Test1 extends LinearOpMode {
 
-    private DcMotor testMotor = null;
-    private Servo testServo = null;
+    public ThreadTest threadTest = new ThreadTest();
+
+    public LinearOpMode target;
 
     @Override
     public void runOpMode() {
-
-        testMotor = hardwareMap.get(DcMotor.class, "MotorTest");
-        testServo = hardwareMap.get(Servo.class, "ServoTest");
-
-        testServo = hardwareMap.get(Servo.class, "233");
-
-        ThreadServo threadServo = new ThreadServo(testServo, 800, 0.2, 0.6);
-
+        telemetry.addLine("233222");
+        telemetry.update();
         waitForStart();
-        while (opModeIsActive()) {
+        telemetry.addLine("MMMMM");
+        telemetry.update();
 
-            if (gamepad1.left_stick_button) {
-                threadServo.start();
-
-            }
-
-            testMotor.setPower(gamepad1.left_stick_y);//我们希望能够在舵机自动转动的时候也能执行这一句代码
-
-        }
     }
 
+    public void work() {
+        threadTest.start();
+    }
 
-
-    public class ThreadServo extends Thread {
-        private Servo servo;
-        private int time;
-        private double startPosition;
-        private double endPosition;
-
-
-        public ThreadServo (Servo servo, int time, double startPosition, double endPosition) {
-            this.servo = servo;
-            this.time = time;
-            this.startPosition = startPosition;
-            this.endPosition = endPosition;
+    private class ThreadTest extends Thread {
+        private ThreadTest () {
         }
         public void run() {
-            try {
-                servo.setPosition(startPosition);//转动舵机到startPosition位置
-                sleep(time);//等待，时长为time
-                servo.setPosition(endPosition);//转动舵机到endPosition位置
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            while (true){
+                telemetry.addLine("233");
+                telemetry.update();
+                try {
+                    waitOneFullHardwareCycle();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
