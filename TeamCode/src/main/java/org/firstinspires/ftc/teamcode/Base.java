@@ -56,6 +56,12 @@ public class Base {
     public DcMotor motorBL = null;
     public DcMotor motorBR = null;
 
+    public boolean isAutoDriving = false;//是否处于自动驾驶状态
+    public Navigator navigator = null;//定位器对象
+
+    //自动驾驶的线程
+    public ThreadAutoDrive threadAutoDrive = new ThreadAutoDrive(new Vector2(0, 0), 0, null);
+
     //用于保存hardwareMap
     HardwareMap hwMap = null;
 
@@ -209,6 +215,139 @@ public class Base {
             result = -result;
         }
         return result;
+    }
+
+    /**
+     * 自动驾驶方法
+     * @param targetPosition 目标坐标
+     * @param targetRotation 目标旋转度数
+     */
+    public void autoDrive(Vector2 targetPosition, double targetRotation){
+        threadAutoDrive.setTargetPosition(targetPosition);
+        threadAutoDrive.setTargetRotation(targetRotation);
+        threadAutoDrive.setNavigator(navigator);
+        if (!isAutoDriving){ threadAutoDrive.start(); }
+    }
+
+    /**
+     * 自动驾驶方法的仅平移版本
+     * @param targetPosition 目标坐标
+     */
+    public void runToPosition(Vector2 targetPosition){
+        threadAutoDrive.setTargetPosition(targetPosition);
+        threadAutoDrive.setNavigator(navigator);
+        if (!isAutoDriving){ threadAutoDrive.start(); }
+    }
+
+    /**
+     * 自动驾驶方法的仅旋转版本
+     * @param targetRotation 目标旋转度数
+     */
+    public void turnToRotation(double targetRotation){
+        threadAutoDrive.setTargetRotation(targetRotation);
+        threadAutoDrive.setNavigator(navigator);
+        if (!isAutoDriving){ threadAutoDrive.start(); }
+    }
+
+    /**
+     * 自动驾驶方法的 看向指定坐标的版本
+     * @param target 指定坐标（全局）
+     */
+    public void lookAt(Vector2 target){
+        double targetRotation = Vector2.UP().angleTo(target);
+        turnToRotation(targetRotation);
+    }
+
+    public class ThreadAutoDrive extends Thread {
+        double lowSpeedModeInDistance = 100;//进入低速泊车状态的距离阈值
+        double lowSpeedModeInRotation = 5;//进入低速泊车状态的度数阈值
+
+        Vector2 targetPosition = new Vector2(0, 0);//目标坐标
+        double targetRotation = 0;//目标yaw轴旋转度数
+        Navigator navigator = null;//定位器
+        boolean flag = false;//用于标识是否要进行自动驾驶
+
+        Vector2 initialDeltaVector = new Vector2(0, 0);//开始自动驾驶时，车体到目标坐标的向量
+        double initialDeltaRotation = 0;//开始自动驾驶时，车体到目标度数的差值
+
+        private ThreadAutoDrive (Vector2 targetPosition, double targetRotation, Navigator navigator) {
+            this.targetPosition = targetPosition;
+            this.targetRotation = targetRotation;
+            this.navigator = navigator;
+        }
+
+        public void run() {
+            isAutoDriving = true;
+            flag = true;
+
+            initialDeltaVector = targetPosition.minus(navigator.getPosition());
+            initialDeltaRotation = targetRotation - navigator.getRotation();
+
+            while (flag){
+                //获取 向量、度数差值
+                Vector2 deltaVector = targetPosition.minus(navigator.getPosition());
+                double deltaRotation = targetRotation - navigator.getRotation();
+
+                //达到足够精度，自己退出自动驾驶
+                if (deltaVector.length() <= 1 && deltaRotation < 0.05){
+                    stopWithFlag();
+                    continue;
+                }
+
+                boolean isLowSpeedInDistance = false;
+                boolean isLowSpeedInRotation = false;
+
+                //标识是否进入低速泊车模式
+                if (deltaVector.length() < lowSpeedModeInDistance){ isLowSpeedInDistance = true; }
+                if (Math.abs(deltaRotation) < lowSpeedModeInRotation){ isLowSpeedInRotation = true; }
+
+                //调用drive自动驾驶（使用三元运算符）
+                drive(
+                        isLowSpeedInDistance ? deltaVector.multiply(deltaVector.length() / 100) : deltaVector,
+                        isLowSpeedInRotation ? deltaRotation / 5 : deltaRotation,
+                        false
+                );
+            }
+        }
+
+        public void setTargetPosition(Vector2 targetPosition) {
+            this.targetPosition = targetPosition;
+            initialDeltaVector = targetPosition.minus(navigator.getPosition());
+        }
+
+        public void setTargetRotation(double targetRotation) {
+            this.targetRotation = targetRotation;
+            initialDeltaRotation = targetRotation - navigator.getRotation();
+        }
+
+        public void stopWithFlag(){
+            flag = false;
+            isAutoDriving = false;
+        }
+
+        public void setNavigator(Navigator navigator) {
+            this.navigator = navigator;
+        }
+
+        public void setLowSpeedModeInDistance(double lowSpeedModeInDistance){
+            this.lowSpeedModeInDistance = lowSpeedModeInDistance;
+        }
+
+        public void setLowSpeedModeInRotation(double lowSpeedModeInRotation){
+            this.lowSpeedModeInRotation = lowSpeedModeInRotation;
+        }
+    }
+
+    /**
+     * 停止自动驾驶
+     * @return 布尔值，代表是否成功停止（如果原来就是不处于自动驾驶状态，那么就是返回false）
+     */
+    public boolean stopAutoDrive(){
+        if (!isAutoDriving){
+            return false;
+        }
+        threadAutoDrive.stopWithFlag();
+        return true;
     }
  }
 

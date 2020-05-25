@@ -73,6 +73,19 @@ public class Vector2 {
     }
 
     /**
+     * 获得与目标向量的夹角
+     * @param target 目标向量
+     * @return 二者夹角
+     */
+    public double angleTo(Vector2 target){
+        double x1 = x;
+        double x2 = target.getX();
+        double y1 = y;
+        double y2 = target.getY();
+        return Math.acos((x1*x2+y1*y2) / Math.sqrt(x1*x1+y1*y1) * Math.sqrt(x2*x2+y2*y2));
+    }
+
+    /**
      * 获取向量长度
      * @return 向量长度
      */
@@ -83,72 +96,104 @@ public class Vector2 {
     /**
      * 获得与目标向量相加后的向量
      * @param target 目标向量
+     * @return 运算后的向量
      */
-    public void plus(Vector2 target){
-        this.x += target.getX();
-        this.y += target.getY();
+    public Vector2 plus(Vector2 target){
+        return new Vector2(x + target.getX(), y + target.getY());
     }
 
     /**
      * 获得与目标向量相减后的向量
      * @param target 目标向量
+     * @return 运算后的向量
      */
-    public void minus(Vector2 target){
-        this.x -= target.getX();
-        this.y -= target.getY();
+    public Vector2 minus(Vector2 target){
+        return new Vector2(x - target.getX(), y - target.getY());
     }
 
     /**
      * 获得与目标数相乘后的向量
      * @param target 目标数值
+     * @return 运算后的向量
      */
-    public void multiply(int target){
-        this.x *= target;
-        this.y *= target;
+    public Vector2 multiply(int target){
+        return new Vector2(x * target, y * target);
     }
 
     /**
      * 获得与目标数相乘后的向量
      * @param target 目标数值
+     * @return 运算后的向量
      */
-    public void multiply(float target){
-        this.x *= target;
-        this.y *= target;
+    public Vector2 multiply(float target){
+        return new Vector2(x * target, y * target);
     }
 
     /**
      * 获得与目标数相乘后的向量
      * @param target 目标数值
+     * @return 运算后的向量
      */
-    public void multiply(double target){
-        this.x *= target;
-        this.y *= target;
+    public Vector2 multiply(double target){
+        return new Vector2(x * target, y * target);
     }
 
     /**
      * 获得与目标数相除后的向量
      * @param target 目标数值
+     * @return 运算后的向量
      */
-    public void devide(int target){
-        this.x /= target;
-        this.y /= target;
+    public Vector2 devide(int target){
+        return new Vector2(x / target, y / target);
     }
 
     /**
      * 获得与目标数相除后的向量
      * @param target 目标数值
+     * @return 运算后的向量
      */
-    public void devide(float target){
-        this.x /= target;
-        this.y /= target;
+    public Vector2 devide(float target){
+        return new Vector2(x / target, y / target);
     }
 
     /**
      * 获得与目标数相除后的向量
      * @param target 目标数值
+     * @return 运算后的向量
      */
-    public void devide(double target){
-        this.x /= target;
-        this.y /= target;
+    public Vector2 devide(double target){
+        return new Vector2(x / target, y / target);
+    }
+
+    /**
+     * 上向量
+     * @return 上向量
+     */
+    public static Vector2 UP(){
+        return new Vector2(0, -1);
+    }
+
+    /**
+     * 下向量
+     * @return 下向量
+     */
+    public static Vector2 DOWN(){
+        return new Vector2(0, 1);
+    }
+
+    /**
+     * 右向量
+     * @return 右向量
+     */
+    public static Vector2 RIGHT(){
+        return new Vector2(1, 0);
+    }
+
+    /**
+     * 左向量
+     * @return 左向量
+     */
+    public static Vector2 LEFT(){
+        return new Vector2(-1, 0);
     }
 }

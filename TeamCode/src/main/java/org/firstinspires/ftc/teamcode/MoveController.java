@@ -54,16 +54,15 @@ import java.math.BigDecimal;
 public class MoveController extends LinearOpMode {
     Base base = new Base();
 
-    private Navigator navigator = new Navigator();
-    private ThreadNavigator threadNavigator = new ThreadNavigator();
+    private Navigator navigator = new Navigator();//定位器
+    private ThreadNavigator threadNavigator = new ThreadNavigator();//定位器的线程
 
-    private ElapsedTime runtime = new ElapsedTime();
-
-
+    private ElapsedTime runtime = new ElapsedTime();//运行时间计时器
 
     @Override
     public void runOpMode() {
         base.init(hardwareMap);
+        base.navigator = navigator;
 
         navigator.debugMode = true;
         navigator.init(hardwareMap);
@@ -74,29 +73,32 @@ public class MoveController extends LinearOpMode {
         threadNavigator.start();
 
         while (opModeIsActive()) {
-            Vector2 linearVelocityValue = new Vector2(gamepad1.left_stick_y, gamepad1.left_stick_x);
-            double angularVelocityValue = gamepad1.right_trigger - gamepad1.left_trigger;
+            //如果不处于自动驾驶状态，就处理手柄输入并驱动底盘
+            if (!base.isAutoDriving) {
+                Vector2 linearVelocityValue = new Vector2(gamepad1.left_stick_y, gamepad1.left_stick_x);
+                double angularVelocityValue = gamepad1.right_trigger - gamepad1.left_trigger;
 
-            base.drive(linearVelocityValue, angularVelocityValue, true);
+                base.drive(linearVelocityValue, angularVelocityValue, true);
 
-            if (gamepad1.dpad_up){
-                base.fixDrive(Base.fixDriveMode.FORWARD, 1, true);
+                if (gamepad1.dpad_up){
+                    base.fixDrive(Base.fixDriveMode.FORWARD, 1, true);
+                }
+                if (gamepad1.dpad_down){
+                    base.fixDrive(Base.fixDriveMode.BACK, 1, true);
+                }
+                if (gamepad1.dpad_left){
+                    base.fixDrive(Base.fixDriveMode.LEFT, 1, true);
+                }
+                if (gamepad1.dpad_right){
+                    base.fixDrive(Base.fixDriveMode.RIGHT, 1, true);
+                }
             }
-            if (gamepad1.dpad_down){
-                base.fixDrive(Base.fixDriveMode.BACK, 1, true);
-            }
-            if (gamepad1.dpad_left){
-                base.fixDrive(Base.fixDriveMode.LEFT, 1, true);
-            }
-            if (gamepad1.dpad_right){
-                base.fixDrive(Base.fixDriveMode.RIGHT, 1, true);
-            }
-
         }
     }
 
-
-
+    /**
+     * 定位器的线程
+     */
     private class ThreadNavigator extends Thread {
         private ThreadNavigator () {
         }
@@ -113,18 +115,20 @@ public class MoveController extends LinearOpMode {
         }
     }
 
-    /*
-    getDecimalNumber，返回保留指定位数的浮点数。
-                      参数decimal：保留小数位数。
-                      参数number：要操作的目标浮点数。
+    /**
+     * 返回保留指定位数的浮点数
+     * @param decimal 保留小数位数
+     * @param number 要操作的目标浮点数
+     * @return 运算结果
      */
     private double getDecimalNumber(int decimal, double number){
         BigDecimal b = new BigDecimal(number);
         return b.setScale(decimal, BigDecimal.ROUND_HALF_DOWN).doubleValue();
     }
 
-    /*
-    getIntRuntime，获取当前运行时间的毫秒数
+    /**
+     * 获取当前运行时间的毫秒数
+     * @return 当前运行时间的毫秒数
      */
     private int getIntRuntime(){
         return (Double.valueOf(runtime.milliseconds())).intValue();
