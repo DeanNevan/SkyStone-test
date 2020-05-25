@@ -285,11 +285,12 @@ public class Base {
 
             while (flag){
                 //获取 向量、度数差值
-                Vector2 deltaVector = targetPosition.minus(navigator.getPosition());
+                Vector2 deltaVectorGlobal = targetPosition.minus(navigator.getPosition());
+                Vector2 deltaVectorLocal = deltaVectorGlobal.rotated(-navigator.getRotation());
                 double deltaRotation = targetRotation - navigator.getRotation();
 
                 //达到足够精度，自己退出自动驾驶
-                if (deltaVector.length() <= 1 && deltaRotation < 0.05){
+                if (deltaVectorGlobal.length() <= 1 && deltaRotation < 0.05){
                     stopWithFlag();
                     continue;
                 }
@@ -298,12 +299,12 @@ public class Base {
                 boolean isLowSpeedInRotation = false;
 
                 //标识是否进入低速泊车模式
-                if (deltaVector.length() < lowSpeedModeInDistance){ isLowSpeedInDistance = true; }
+                if (deltaVectorGlobal.length() < lowSpeedModeInDistance){ isLowSpeedInDistance = true; }
                 if (Math.abs(deltaRotation) < lowSpeedModeInRotation){ isLowSpeedInRotation = true; }
 
                 //调用drive自动驾驶（使用三元运算符）
                 drive(
-                        isLowSpeedInDistance ? deltaVector.multiply(deltaVector.length() / 100) : deltaVector,
+                        isLowSpeedInDistance ? deltaVectorGlobal.multiply(deltaVectorGlobal.length() / 100) : deltaVectorGlobal,
                         isLowSpeedInRotation ? deltaRotation / 5 : deltaRotation,
                         false
                 );
